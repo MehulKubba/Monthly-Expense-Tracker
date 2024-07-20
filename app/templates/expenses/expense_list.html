@@ -1,0 +1,101 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense List</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="main">
+        <div class="main-1">
+            <div class="graph">
+                <div class="bar-chart">
+                    <h2>Monthly Expenses Bar Chart</h2>
+                    <div class="plotly-chart" id="plotly-chart"></div>
+                </div>
+            </div>
+            <div class="expense">
+                <h2>Expense List</h2>
+                <div class="expenses">
+                    {% for year_month, expenses in expense_data.items %}
+                    <div class="month">
+                        <h3>Month: {{ year_month }}</h3>
+                        {% for expense in expenses %}
+                        <div class="incomee">
+                            <div class="idhar">
+                                <h2>{{ expense.name }}</h2>
+                                {% if expense.long_term %}
+                                <span class="date">Date From: {{ expense.date_from }} <br>To: {{ expense.date_to }}</span>
+                                {% else %}
+                                <span class="date">Date: {{ expense.date }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="udhar">
+                                <h2>${{ expense.amount }}</h2>
+                            </div>
+                        </div>
+                        <br>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="lower">
+            <div class="income">
+                <h2>Add Long Term Expense or Daily Expense</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.long_term.label_tag }}
+                    {{ form.long_term }}
+                    <br><br>
+                    {{ form.name.label_tag }}
+                    {{ form.name }}
+                    {{ form.amount.label_tag }}
+                    {{ form.amount }}
+                    <br><br>
+                    {{ form.date.label_tag }}
+                    {{ form.date }}
+                    <br><br>
+                    <div id="end_date" style="display: none;">
+                        {{ form.end_date.label_tag }}
+                        {{ form.end_date }}
+                    </div>
+                    <br>
+                    <div id="interest_rate" style="display: none;">
+                        {{ form.interest_rate.label_tag }}
+                        {{ form.interest_rate }}
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-success">Add Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var longTermCheckbox = $('#id_long_term');
+            var longTermFields = $('#interest_rate, #end_date');
+
+            longTermFields.hide();
+
+            longTermCheckbox.on('change', function () {
+                if (longTermCheckbox.is(':checked')) {
+                    longTermFields.show();
+                } else {
+                    longTermFields.hide();
+                }
+            });
+
+            var graphData = {{ graph_data|safe }};
+            Plotly.newPlot('plotly-chart', graphData.data, graphData.layout);
+        });
+    </script>
+</body>
+</html>
